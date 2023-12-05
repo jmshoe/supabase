@@ -1,0 +1,7 @@
+{
+    "imports": {
+      "http/": "https://deno.land/std/http/",
+      "lodash": "https://cdn.skypack.dev/lodash"
+    }
+  }
+  
