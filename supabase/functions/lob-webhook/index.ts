@@ -12,120 +12,132 @@
 // }
 
 //import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Initialize the Supabase client outside the handler
+// const supabase = createClient(
+//   Deno.env.get("SUPABASE_URL") ?? "https://eseuungqholqtwndajdj.supabase.co",
+//   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+//   { global: { headers: { Authorization: req.headers.get("Authorization")! } } }
+// );
+
 const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? 'https://eseuungqholqtwndajdj.supabase.co',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-  { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+  "https://eseuungqholqtwndajdj.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzZXV1bmdxaG9scXR3bmRhamRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk5MzAwNzAsImV4cCI6MjAxNTUwNjA3MH0.fFgv4uiOWlVkjVgQMJmD5U05AiEhdHep6XIS-pwr4K4"
 );
 
 Deno.serve(async (req) => {
-    try {
-        // Parse the JSON payload
-        const payload = await req.json();
-        const letterData = payload.body;
-        const recipient = letterData.to;
-        const sender = letterData.from;
+  try {
+    console.log("hello lob!!");
+    // Parse the JSON payload
+    const payload = await req.json();
+    const letterData = payload.body;
+    const recipient = letterData.to;
+    const sender = letterData.from;
 
-        // Preparing data for insertion
-        // Note: You'll need to modify this to match your database schema and handling
-        const insertData = {
-          id: letterData.id,
-          description: letterData.description,
-          url: letterData.url,
-          color: letterData.color,
-          double_sided: letterData.double_sided,
-          address_placement: letterData.address_placement,
-          return_envelope: letterData.return_envelope,
-          extra_service: letterData.extra_service,
-          expected_delivery_date: letterData.expected_delivery_date,
-          tracking_number: letterData.tracking_number,
-          mail_type: letterData.mail_type,
-          status: letterData.status,
-          date_created: letterData.date_created,
-          send_date: letterData.send_date,
-          //owner_id: generateMD5Hash(recipient.address_line1, recipient.address_line2),
-          //property_id: generateMD5Hash(letterData.merge_variables.property_address, letterData.merge_variables.property_address_line2),
-      
-          // Recipient mappings
-          to_id: recipient.id,
-          to_name: recipient.name,
-          to_address_line1: recipient.address_line1,
-          to_address_line2: recipient.address_line2,
-          to_address_city: recipient.address_city,
-          to_address_state: recipient.address_state,
-          to_address_zip: recipient.address_zip,
-          to_address_country: recipient.address_country,
-          to_date_created: recipient.date_created,
-      
-          // Sender mappings
-          from_id: sender.id,
-          from_name: sender.name,
-          from_address_line1: sender.address_line1,
-          from_address_line2: sender.address_line2,
-          from_address_city: sender.address_city,
-          from_address_state: sender.address_state,
-          from_address_zip: sender.address_zip,
-          from_address_country: sender.address_country,
-          from_date_created: sender.date_created
+    // Preparing data for insertion
+    // Note: You'll need to modify this to match your database schema and handling
+    const insertData = {
+      id: letterData.id,
+      description: letterData.description,
+      url: letterData.url,
+      color: letterData.color,
+      double_sided: letterData.double_sided,
+      address_placement: letterData.address_placement,
+      return_envelope: letterData.return_envelope,
+      extra_service: letterData.extra_service,
+      expected_delivery_date: letterData.expected_delivery_date,
+      tracking_number: letterData.tracking_number,
+      mail_type: letterData.mail_type,
+      status: letterData.status,
+      date_created: letterData.date_created,
+      send_date: letterData.send_date,
+      //owner_id: generateMD5Hash(recipient.address_line1, recipient.address_line2),
+      //property_id: generateMD5Hash(letterData.merge_variables.property_address, letterData.merge_variables.property_address_line2),
 
-          // Merge variables
-        //   merge_variables: letterData.merge_variables,
-        //   offer_price: letterData.merge_variables.offer_price,
-        //   sender_name: letterData.merge_variables.sender_name,
-        //   phone_number: letterData.merge_variables.phone_number,
-        //   sender_line2: letterData.merge_variables.sender_line2,
-        //   property_city: letterData.merge_variables.property_city,
-        //   page2_insert_url: letterData.merge_variables.page2_insert_url,
-        //   property_address: letterData.merge_variables.property_address,
-        //   sender_signature_image_url: letterData.merge_variables.sender_signature_image_url,
-      
-          // Metadata
-        //   metadata: letterData.metadata,
-        //   market: letterData.metadata.market,
-        //   source: letterData.metadata.source,
-        //   campaign: letterData.metadata.campaign,
+      // Recipient mappings
+      to_id: recipient.id,
+      to_name: recipient.name,
+      to_address_line1: recipient.address_line1,
+      to_address_line2: recipient.address_line2,
+      to_address_city: recipient.address_city,
+      to_address_state: recipient.address_state,
+      to_address_zip: recipient.address_zip,
+      to_address_country: recipient.address_country,
+      to_date_created: recipient.date_created,
 
-          // Additional fields
-          // Note: These fields need to be filled based on your application's logic
-          // For example, `to_metadata`, `from_metadata`, `metadata` can be JSON objects
-          // containing additional data you want to store.
-          // Fields like `owner_id`, `property_id`, `market`, etc., must be derived
-          // from your application's context or the webhook payload (if available).
-      
-          // Example of a field that may need parsing or additional logic
-          //thumbnails: JSON.stringify(letterData.thumbnails) // Storing as JSON string
-        };
+      // Sender mappings
+      from_id: sender.id,
+      from_name: sender.name,
+      from_address_line1: sender.address_line1,
+      from_address_line2: sender.address_line2,
+      from_address_city: sender.address_city,
+      from_address_state: sender.address_state,
+      from_address_zip: sender.address_zip,
+      from_address_country: sender.address_country,
+      from_date_created: sender.date_created,
 
-        // Inserting data into the 'letters' table
-        // This will depend on how you connect to and interact with your database in Deno
-        // For example, using a PostgreSQL client for Deno
-        
-        // Inserting data into the 'letters' table
-        const { data, error } = await supabase
-            .from('letters')
-            .insert([insertData]);
+      // Merge variables
+      // merge_variables: letterData.merge_variables,
+      // offer_price: letterData.merge_variables.offer_price,
+      // sender_name: letterData.merge_variables.sender_name,
+      // phone_number: letterData.merge_variables.phone_number,
+      // sender_line2: letterData.merge_variables.sender_line2,
+      // property_city: letterData.merge_variables.property_city,
+      // page2_insert_url: letterData.merge_variables.page2_insert_url,
+      // property_address: letterData.merge_variables.property_address,
+      // sender_signature_image_url:
+      //   letterData.merge_variables.sender_signature_image_url,
 
-        // Handle any errors
-        if (error) throw error;
+      // Metadata
+      metadata: letterData.metadata,
+      // market: letterData.metadata.market,
+      // source: letterData.metadata.source,
+      // campaign: letterData.metadata.campaign,
 
-        // Return a success response
-        return new Response(JSON.stringify(data), {
-            headers: { "Content-Type": "application/json" },
-            status: 200
-        });
+      // Additional fields
+      // Note: These fields need to be filled based on your application's logic
+      // For example, `to_metadata`, `from_metadata`, `metadata` can be JSON objects
+      // containing additional data you want to store.
+      // Fields like `owner_id`, `property_id`, `market`, etc., must be derived
+      // from your application's context or the webhook payload (if available).
 
-    } catch (error) {
-        // Returning an error response
-        return new Response(JSON.stringify({ message: error.message }), {
-            headers: { "Content-Type": "application/json" },
-            status: 500
-        });
-    }
+      // Example of a field that may need parsing or additional logic
+      //thumbnails: JSON.stringify(letterData.thumbnails) // Storing as JSON string
+    };
+
+    console.log("insertData");
+    console.log(insertData);
+
+    // Inserting data into the 'letters' table
+    // This will depend on how you connect to and interact with your database in Deno
+    // For example, using a PostgreSQL client for Deno
+
+    // Inserting data into the 'letters' table
+    // const { data, error } = await supabase
+    //   .from("letters")
+    //   .insert([{ ...insertData, from_address_zip: 900000 }]);
+
+    // // Handle any errors
+    // if (error) {
+    //   console.log("error");
+    //   console.log(error);
+    //   throw error;
+    // }
+
+    // // Return a success response
+    return new Response(JSON.stringify(insertData), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    });
+  } catch (error) {
+    // Returning an error response
+    return new Response(JSON.stringify({ message: error.message }), {
+      headers: { "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
 });
-
 
 // To invoke:
 // curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/' \
