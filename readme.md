@@ -24,5 +24,6 @@
 
 1. Add a new secret to the live environment called `LOB_WEBHOOKS_SECRET_KEY`.
 2. The secret is unique for each webhook and can be found in the details page for the respective webhook in the dashboard.
-3. Assuming you have the setup done locally, run the command `supabase functions deploy lob-webhook-fixed --no-verify-jwt --project-ref LIVE_KEY`. We are bypassing JWT authentication because we have a LOB webhook specific authentication setup.
-4. The webhook should be available in the live environment and run as expected
+3. Change the line `insert([{ ...insertData, from_address_zip: 900000 }])` with `insert([insertData ])`
+4. Assuming you have the setup done locally, run the command `supabase functions deploy lob-webhook-fixed --no-verify-jwt --project-ref LIVE_KEY`. We are bypassing JWT authentication because we have a LOB webhook specific authentication setup.
+5. The webhook should be available in the live environment and run as expected
