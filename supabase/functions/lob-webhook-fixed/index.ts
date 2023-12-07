@@ -22,16 +22,21 @@ Deno.serve(async (req) => {
     const payload = await req.json();
 
     // Verifying LOB signature
-    const rawBody = JSON.stringify(payload);
-    const signature_input = lobSignatureTimestamp + "." + rawBody;
-    const expected_signature = new HMAC(new SHA256())
-      .init(LOB_SECRET)
-      .update(signature_input)
-      .digest("hex");
-
-    if (lob_signature !== expected_signature) {
+    try {
+      const rawBody = JSON.stringify(payload);
+      const signature_input = lobSignatureTimestamp + "." + rawBody;
+      const expected_signature = new HMAC(new SHA256())
+        .init(LOB_SECRET)
+        .update(signature_input)
+        .digest("hex");
+      if (lob_signature !== expected_signature) {
+        throw Error("Authentication Error");
+      }
+    } catch (error) {
       throw Error("Authentication Error");
     }
+
+    console.log("went past security");
     const letterData = payload.body;
     const recipient = letterData.to;
     const sender = letterData.from;
