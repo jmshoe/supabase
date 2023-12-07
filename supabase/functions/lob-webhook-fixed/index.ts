@@ -2,6 +2,9 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { HMAC } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
+import { SHA256 } from "https://deno.land/x/hmac@v2.0.1/deps.ts";
+import { Buffer } from "https://deno.land/std@0.177.0/node/buffer.ts";
 
 const supabase = createClient(
   "https://eseuungqholqtwndajdj.supabase.co",
@@ -9,10 +12,26 @@ const supabase = createClient(
 );
 
 Deno.serve(async (req) => {
+  const LOB_SECRET = Deno.env.get("LOB_WEBHOOKS_SECRET_KEY");
+
   try {
     console.log("hello lob!!");
+    const lob_signature = req.headers.get("lob-signature");
+    const lobSignatureTimestamp = req.headers.get("lob-signature-timestamp");
     // Parse the JSON payload
     const payload = await req.json();
+
+    // Verifying LOB signature
+    const rawBody = JSON.stringify(payload);
+    const signature_input = lobSignatureTimestamp + "." + rawBody;
+    const expected_signature = new HMAC(new SHA256())
+      .init(LOB_SECRET)
+      .update(signature_input)
+      .digest("hex");
+
+    if (lob_signature !== expected_signature) {
+      throw Error("Authentication Error");
+    }
     const letterData = payload.body;
     const recipient = letterData.to;
     const sender = letterData.from;
@@ -20,7 +39,7 @@ Deno.serve(async (req) => {
     // Preparing data for insertion
     // Note: You'll need to modify this to match your database schema and handling
     const insertData = {
-      id: "test",
+      id: letterData.id,
       description: letterData.description,
       url: letterData.url,
       color: letterData.color,
@@ -88,18 +107,16 @@ Deno.serve(async (req) => {
       //thumbnails: JSON.stringify(letterData.thumbnails) // Storing as JSON string
     };
 
-    console.log("insertData");
-    console.log(insertData);
-
     // Inserting data into the 'letters' table
     // This will depend on how you connect to and interact with your database in Deno
     // For example, using a PostgreSQL client for Deno
-
     // Inserting data into the 'letters' table
+    console.log("insertData");
+    console.log(insertData);
     const { data, error } = await supabase
       .from("letters")
-      .insert([{ ...insertData, from_address_zip: 900000 }]);
-
+      .insert([{ ...insertData, from_address_zip: 900000 }]); // TODO FOR JASON: please remove this line for live data and replace it with the one below
+    // .insert([insertData ]);
     // // Handle any errors
     if (error) {
       console.log("error");
