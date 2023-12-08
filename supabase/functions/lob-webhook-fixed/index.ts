@@ -4,12 +4,11 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { HMAC } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 import { SHA256 } from "https://deno.land/x/hmac@v2.0.1/deps.ts";
-import { Buffer } from "https://deno.land/std@0.177.0/node/buffer.ts";
 
-const supabase = createClient(
-  "https://eseuungqholqtwndajdj.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzZXV1bmdxaG9scXR3bmRhamRqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY5OTkzMDA3MCwiZXhwIjoyMDE1NTA2MDcwfQ.J-mYNhFsYh8B3IrWQdcKIMicNlAPVPRxTng397DLDEE"
-);
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 Deno.serve(async (req) => {
   const LOB_SECRET = Deno.env.get("LOB_WEBHOOKS_SECRET_KEY");
@@ -84,22 +83,22 @@ Deno.serve(async (req) => {
       from_date_created: sender.date_created,
 
       // Merge variables
-      // merge_variables: letterData.merge_variables,
-      // offer_price: letterData.merge_variables.offer_price,
-      // sender_name: letterData.merge_variables.sender_name,
-      // phone_number: letterData.merge_variables.phone_number,
-      // sender_line2: letterData.merge_variables.sender_line2,
-      // property_city: letterData.merge_variables.property_city,
-      // page2_insert_url: letterData.merge_variables.page2_insert_url,
-      // property_address: letterData.merge_variables.property_address,
-      // sender_signature_image_url:
-      //   letterData.merge_variables.sender_signature_image_url,
+      merge_variables: letterData.merge_variables,
+      offer_price: letterData.merge_variables.offer_price,
+      sender_name: letterData.merge_variables.sender_name,
+      phone_number: letterData.merge_variables.phone_number,
+      sender_line2: letterData.merge_variables.sender_line2,
+      property_city: letterData.merge_variables.property_city,
+      page2_insert_url: letterData.merge_variables.page2_insert_url,
+      property_address: letterData.merge_variables.property_address,
+      sender_signature_image_url:
+        letterData.merge_variables.sender_signature_image_url,
 
       // Metadata
       metadata: letterData.metadata,
-      // market: letterData.metadata.market,
-      // source: letterData.metadata.source,
-      // campaign: letterData.metadata.campaign,
+      market: letterData.metadata.market,
+      source: letterData.metadata.source,
+      campaign: letterData.metadata.campaign,
 
       // Additional fields
       // Note: These fields need to be filled based on your application's logic
@@ -120,9 +119,8 @@ Deno.serve(async (req) => {
     console.log(insertData);
     const { data, error } = await supabase
       .from("letters")
-      .insert([{ ...insertData, from_address_zip: 900000 }]); // TODO FOR JASON: please remove this line for live data and replace it with the one below
-    // .insert([insertData ]);
-    // // Handle any errors
+      // .insert([{ ...insertData, from_address_zip: 900000 }]); // TODO FOR JASON: please remove this line for live data and replace it with the one below
+      .upsert(insertData, { onConflict: ["id"] });
     if (error) {
       console.log("error");
       console.log(error);
