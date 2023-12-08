@@ -119,7 +119,6 @@ Deno.serve(async (req) => {
     console.log(insertData);
     const { data, error } = await supabase
       .from("letters")
-      // .insert([{ ...insertData, from_address_zip: 900000 }]); // TODO FOR JASON: please remove this line for live data and replace it with the one below
       .upsert(insertData, { onConflict: ["id"] });
     if (error) {
       console.log("error");
